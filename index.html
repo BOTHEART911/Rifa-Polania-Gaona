@@ -80,11 +80,6 @@
       background:#eef2f7; color:#6b7280; border-color:#cbd5e1; cursor:not-allowed; box-shadow:none;
     }
 
-    }
-    .muted{ color:#666; font-size:.9rem; }
-    .center{ text-align:center; }
-    }
-
     .muted{ color:#6b7280; font-size:.95rem; }
     .hidden{ display:none !important; }
 
@@ -101,13 +96,13 @@
     .spinner-ios i:nth-child(3){transform:rotate(60deg) translateY(-24px);animation-delay:-0.9s;}
     .spinner-ios i:nth-child(4){transform:rotate(90deg) translateY(-24px);animation-delay:-0.8s;}
     .spinner-ios i:nth-child(5){transform:rotate(120deg) translateY(-24px);animation-delay:-0.7s;}
-    .spinner-ios i:nth-child(6){transform:rotate(150deg) translateY(-24px);animation-delay:-0.6s;}
-    .spinner-ios i:nth-child(7){transform:rotate(180deg) translateY(-24px);animation-delay:-0.5s;}
-    .spinner-ios i:nth-child(8){transform:rotate(210deg) translateY(-24px);animation-delay:-0.4s;}
-    .spinner-ios i:nth-child(9){transform:rotate(240deg) translateY(-24px);animation-delay:-0.3s;}
-    .spinner-ios i:nth-child(10){transform:rotate(270deg) translateY(-24px);animation-delay:-0.2s;}
-    .spinner-ios i:nth-child(11){transform:rotate(300deg) translateY(-24px);animation-delay:-0.1s;}
-    .spinner-ios i:nth-child(12){transform:rotate(330deg) translateY(-24px);animation-delay:0s;}
+    .spinner-ios i:nth-child(6){transform:rotate(150deg) translateY(-0.6s);}
+    .spinner-ios i:nth-child(7){transform:rotate(180deg) translateY(-0.5s);}
+    .spinner-ios i:nth-child(8){transform:rotate(210deg) translateY(-0.4s);}
+    .spinner-ios i:nth-child(9){transform:rotate(240deg) translateY(-0.3s);}
+    .spinner-ios i:nth-child(10){transform:rotate(270deg) translateY(-0.2s);}
+    .spinner-ios i:nth-child(11){transform:rotate(300deg) translateY(-0.1s);}
+    .spinner-ios i:nth-child(12){transform:rotate(330deg) translateY(0s);}
   </style>
 </head>
 <body>
@@ -279,8 +274,13 @@
     }
 
     function validar(){
-      const nombre = (document.getElementById('nombre').value || '').trim();
-      const telefono = (document.getElementById('telefono').value || '').trim();
+      // Normaliza nombre a MAYÚSCULAS y teléfono a solo dígitos antes de enviar
+      let nombre = (document.getElementById('nombre').value || '');
+      nombre = nombre.normalize('NFC').replace(/\s+/g,' ').trim().toLocaleUpperCase('es-CO');
+
+      let telefono = (document.getElementById('telefono').value || '');
+      telefono = telefono.replace(/\D/g,'').trim(); // solo dígitos
+
       if (selected.size < 1) { Swal.fire({icon:'warning', title:'Selecciona al menos un número'}); return null; }
       if (!nombre) { Swal.fire({icon:'warning', title:'Nombre requerido'}); return null; }
       if (!/^\d{10}$/.test(telefono)) { Swal.fire({icon:'warning', title:'Teléfono inválido', text:'Debe tener exactamente 10 dígitos.'}); return null; }
