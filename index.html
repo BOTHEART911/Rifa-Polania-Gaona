@@ -356,11 +356,11 @@
 
         function drawLabelValue(label, value, yy, valueColorOverride){
           ctx.textAlign = 'left';
-          ctx.font = 'bold 30px Arial';
+          ctx.font = 'bold 40px Arial';
           ctx.fillStyle = labelColor;
           ctx.fillText(label, left, yy);
 
-          ctx.font = '30px Arial';
+          ctx.font = '40px Arial';
           ctx.fillStyle = valueColorOverride || valueColor;
           wrapText(ctx, String(value || ''), left + 190, yy, maxTextWidth - 190, 36);
         }
