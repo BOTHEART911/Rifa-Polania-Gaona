@@ -297,6 +297,96 @@
       return { nombre, telefono, numeros: [...selected] };
     }
 
+    // =======================
+    // Generación de imagen (descarga automática al confirmar)
+    // =======================
+    function generarImagenRifa(formData, callback){
+      const width = 768;
+      const height = 768;
+      const backgroundUrl = 'https://res.cloudinary.com/dqqeavica/image/upload/v1760530219/Agradecimiento_khpemn.png';
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = backgroundUrl;
+
+      img.onload = function(){
+        // Fondo
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Sombra ligera para textos
+        ctx.shadowColor = 'rgba(0,0,0,0.18)';
+        ctx.shadowBlur = 3;
+
+        // Título centrado (parte superior, para no tapar la mitad inferior ocupada)
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#0b66ff'; // Azul del diseño de referencia
+        ctx.font = 'bold 44px Arial';
+        ctx.fillText('¡Gracias por tu colaboración!', width/2, 90);
+
+        // Textos alineados a la izquierda en el tercio superior
+        const left = 56;
+        let y = 160;
+        const gap = 56;
+        const labelColor = '#0b66ff'; // Azul
+        const valueColor = '#111';    // Oscuro legible
+        const accentColor = '#e91e63';// Magenta/rosa de referencia
+        const maxTextWidth = width - left*2;
+
+        function wrapText(ctx, text, x, yy, maxWidth, lineHeight){
+          const words = String(text).split(' ');
+          let line = '';
+          for (let i = 0; i < words.length; i++){
+            const test = line ? line + ' ' + words[i] : words[i];
+            if (ctx.measureText(test).width > maxWidth && line){
+              ctx.fillText(line, x, yy);
+              yy += lineHeight;
+              line = words[i];
+            }else{
+              line = test;
+            }
+          }
+          ctx.fillText(line, x, yy);
+          return yy;
+        }
+
+        function drawLabelValue(label, value, yy, valueColorOverride){
+          ctx.textAlign = 'left';
+          ctx.font = 'bold 30px Arial';
+          ctx.fillStyle = labelColor;
+          ctx.fillText(label, left, yy);
+
+          ctx.font = '30px Arial';
+          ctx.fillStyle = valueColorOverride || valueColor;
+          wrapText(ctx, String(value || ''), left + 190, yy, maxTextWidth - 190, 36);
+        }
+
+        drawLabelValue('Nombre:', formData.nombre, y); y += gap;
+        drawLabelValue('Números:', formData.numeros, y, accentColor);
+
+        // Descargar imagen
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        const safeName = String(formData.nombre || 'Rifa').replace(/[^\w\s-]/g,'').trim().slice(0,60);
+        link.download = (safeName ? safeName + ' - ' : '') + 'Mis números.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        if (typeof callback === 'function') callback();
+      };
+
+      img.onerror = function(){
+        Swal.fire({ icon:'error', title:'Error', text:'No se pudo cargar la imagen de fondo.' });
+        if (typeof callback === 'function') callback();
+      };
+    }
+    // =======================
+
     // Eventos
     document.getElementById('btn-empezar').addEventListener('click', async ()=>{
       try{ await cargarNumeros(); showView('view-seleccion'); }
@@ -321,6 +411,12 @@
 
       try{
         await apiPost('reservar', body);
+
+        // DESCARGAR IMAGEN automáticamente al confirmar la apuesta
+        generarImagenRifa({
+          nombre: body.nombre,
+          numeros: body.numeros.map(emojiToLabel).join(', ')
+        });
 
         const resp = await Swal.fire({
           icon:'success',
