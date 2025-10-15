@@ -223,16 +223,22 @@
     // Estado
     let DATA = [];                 // [{emoji, estado}]
     const selected = new Set();    // guarda EMOJIS seleccionados (para escribir igual que en hoja)
+    const LABEL_CACHE = new Map(); // caché de etiquetas "00" para cada emoji
 
-    // Util: emoji "0️⃣1️⃣" -> "01"
+    // Util: emoji "0️⃣1️⃣" -> "01" (con caché para evitar trabajo repetido)
     function emojiToLabel(emoji){
+      if (LABEL_CACHE.has(emoji)) return LABEL_CACHE.get(emoji);
+      let out = '';
       try{
-        const digits = (emoji.match(/\d/g) || []).join('');
-        if (digits.length === 2) return digits;
-        if (digits.length === 1) return digits.padStart(2, '0');
-      }catch(_){}
-      // Fallback: muestra el emoji tal cual
-      return emoji || '';
+        const digits = (String(emoji).match(/\d/g) || []).join('');
+        if (digits.length === 2) out = digits;
+        else if (digits.length === 1) out = digits.padStart(2, '0');
+        else out = String(emoji || '');
+      }catch(_){
+        out = String(emoji || '');
+      }
+      LABEL_CACHE.set(emoji, out);
+      return out;
     }
 
     function showView(id){
@@ -245,6 +251,8 @@
       const grid = document.getElementById('num-grid');
       grid.innerHTML = '';
       selected.clear();
+
+      const frag = document.createDocumentFragment();
 
       for(const it of items){
         const btn = document.createElement('button');
@@ -269,8 +277,10 @@
           }
         });
 
-        grid.appendChild(btn);
+        frag.appendChild(btn);
       }
+
+      grid.appendChild(frag);
     }
 
     async function cargarNumeros(){
