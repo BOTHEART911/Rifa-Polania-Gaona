@@ -268,14 +268,15 @@
         }
 
         btn.addEventListener('click', ()=>{
-          if(btn.classList.contains('selected')){
-            btn.classList.remove('selected');
-            selected.delete(btn.dataset.emoji);
-          }else{
-            btn.classList.add('selected');
-            selected.add(btn.dataset.emoji);
-          }
-        });
+        playSoundOnce(SOUNDS.back);
+        if(btn.classList.contains('selected')){
+          btn.classList.remove('selected');
+          selected.delete(btn.dataset.emoji);
+        }else{
+          btn.classList.add('selected');
+          selected.add(btn.dataset.emoji);
+        }
+      });
 
         frag.appendChild(btn);
       }
@@ -433,8 +434,9 @@
           const url = `https://api.whatsapp.com/send?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(msg)}`;
           window.open(url, '_blank');
         };
-        if(resp.isConfirmed) openWA('573103230712','¡Listo Oscar!, ya seleccioné mis números.');
-        if(resp.isDenied)    openWA('573183851642','¡Listo Mafe!, ya seleccioné mis números.');
+        const numerosMsg = body.numeros.map(emojiToLabel).join(', ');
+        if(resp.isConfirmed) openWA('573103230712',`*¡Listo Oscar!*, ya seleccioné mis números: *${numerosMsg}*`);
+        if(resp.isDenied)    openWA('573183851642',`*¡Listo Mafe!*, ya seleccioné mis números: *${numerosMsg}*`);
 
         // Reset y volver
         document.getElementById('nombre').value = '';
